@@ -41,6 +41,9 @@ def main(file_path: str) -> None:
     if not cap.isOpened():
         print(f"Failed to open video '{file_path}'")
         exit()
+    framerate = cap.get(cv2.CAP_PROP_FPS)
+    if framerate == 0.0:
+        framerate = 30.0
     imgs = []
     while cap.isOpened():
         ret, frame = cap.read()
@@ -89,7 +92,7 @@ def main(file_path: str) -> None:
 
         cv2.imshow("img", img)
 
-        key = cv2.waitKey(1000 // 30)
+        key = cv2.waitKey(int(1000.0 / framerate))
         if key == 27:  # Esc
             break
 
