@@ -1,6 +1,7 @@
 import sys
 from typing import Sequence
 
+import time
 import cv2
 import numpy as np
 
@@ -13,7 +14,7 @@ def edge_filter(gray: np.ndarray) -> np.ndarray:
         gray, cv2.CV_32F, 0, 1, ksize=3, scale=1.0, delta=0.0, borderType=cv2.BORDER_DEFAULT
     )
     grad_norm = np.sqrt(np.square(grad_x) + np.square(grad_y))
-    # return grad_norm
+    return np.clip(grad_norm, 0.0, 255.0).astype(np.uint8)
     return (grad_norm > 100.0).astype(np.uint8) * 255
 
 
@@ -77,6 +78,8 @@ def main(file_path: str) -> None:
     hsv = np.zeros_like(imgs[0])
     hsv[..., 1] = 255
 
+    last_time = time.time()
+
     i = 1
     while True:
         next = cv2.cvtColor(imgs[i], cv2.COLOR_RGB2GRAY)
@@ -116,7 +119,12 @@ def main(file_path: str) -> None:
 
         cv2.imshow("img", img)
 
-        key = cv2.waitKey(int(1000.0 / framerate))
+        current_time = time.time()
+        elapsed = current_time - last_time
+        time_to_wait = max(int(1000.0 / framerate - 1000 * elapsed), 1)
+        last_time = current_time
+
+        key = cv2.waitKey(time_to_wait)
         if key == 27:  # Esc
             break
 
