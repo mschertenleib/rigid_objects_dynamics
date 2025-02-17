@@ -73,12 +73,13 @@ def main(file_path: str) -> None:
     img = np.zeros(shape=(imgs[0].shape[0] * 2, imgs[0].shape[1] * 2, 3), dtype=np.uint8)
 
     prev = cv2.cvtColor(imgs[0], cv2.COLOR_RGB2GRAY)
-    edges_prev = edge_filter(prev)
 
     hsv = np.zeros_like(imgs[0])
     hsv[..., 1] = 255
 
     last_time = time.time()
+
+    orb = cv2.ORB_create()
 
     i = 1
     while True:
@@ -116,6 +117,16 @@ def main(file_path: str) -> None:
         )
         img_bottom_left[:] = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
         img_top_right[:] = cv2.cvtColor(edges_next, cv2.COLOR_GRAY2BGR)
+
+        kp = orb.detect(img, None)
+        kp, des = orb.compute(img, kp)
+        cv2.drawKeypoints(
+            img_top_right,
+            keypoints=kp,
+            outImage=img_top_right,
+            color=(0, 255, 0),
+            flags=0,
+        )
 
         cv2.imshow("img", img)
 
